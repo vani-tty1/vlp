@@ -632,7 +632,7 @@ void print_help(void) {
     printf("  -i, --installed           show packages currently installed according to the log\n");
     printf("  -c, --show-commands       show the last n user-initiated 'pacman -S ...' commands\n");
     printf("  -u, --upgraded            show the last n package upgrades\n");
-    printf("  -s, --show-hist          show the last n transactions, packages grouped by transaction\n");
+    printf("  -s, --show-hist           show the last n transactions, packages grouped by transaction\n");
     printf("  -h, --help                display this help and exit\n");
     printf("  -v, --version             output version information and exit\n");
 }

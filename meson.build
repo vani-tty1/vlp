@@ -18,6 +18,17 @@ man_conf.set('VERSION', meson.project_version())
 man_conf.set('PROJECT_NAME', meson.project_name())
 man_conf.set('DATE', 'July 2026')
 
+bash_completion = dependency('bash-completion', required: false)
+if bash_completion.found()
+    completions_dir = bash_completion.get_variable(
+        pkgconfig: 'completionsdir',
+        pkgconfig_define: ['datadir', get_option('prefix') / get_option('datadir')],
+    )
+else
+    completions_dir = get_option('datadir') / 'bash-completion' / 'completions'
+endif
+install_data('completions/vlp', install_dir: completions_dir)
+
 project_c_args = []
 test_c_args = [
     '-Wcast-align',
