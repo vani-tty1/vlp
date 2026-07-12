@@ -1,6 +1,6 @@
 _vlp() {
     local cur="${COMP_WORDS[COMP_CWORD]}"
-    local opts="-i --installed -c --show-commands -u --upgraded -h --help -v --version"
+    local opts="-i --installed -c --show-commands -u --upgraded -s --show-hist -h --help -v --version"
 
     COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
     return 0
