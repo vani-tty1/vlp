@@ -1,0 +1,127 @@
+.TH VLP 1 "@DATE@" "@PROJECT_NAME@ @VERSION@" "User Commands"
+.\"
+.SH NAME
+vlp \- inspect pacman.log for installed packages, sync commands, and upgrades
+.\"
+.SH SYNOPSIS
+.B vlp
+.RB [ \-i | \-\-installed
+.B |
+.RB \-c | \-\-show\-commands
+.B |
+.RB \-u | \-\-upgraded
+.B |
+.RB \-s | \-\-show\-hist ]
+.RI [ n ]
+.br
+.B vlp
+.RB [ \-h | \-\-help ]
+.br
+.B vlp
+.RB [ \-v | \-\-version ]
+.\"
+.SH DESCRIPTION
+.B vlp
+reads
+.I pacman.log
+(and, if present, its rotated counterpart, plain or gzip\-compressed) and
+reports on recent package activity. Exactly one mode flag is required.
+.PP
+The optional argument
+.I n
+limits how many matching log lines are considered before deriving the
+result (default:
+.BR 5000 ,
+subject to the compiled\-in default). For
+.B \-\-installed
+and
+.BR \-\-upgraded ,
+only the most recent action for each package within that window is used
+to decide the package's current state.
+.\"
+.SH OPTIONS
+.TP
+.BR \-i ", " \-\-installed " [\fIn\fR]"
+Show packages that are currently installed according to the log, i.e.
+whose most recent
+.I installed
+or
+.I removed
+event within the last
+.I n
+matching lines was
+.IR installed .
+.TP
+.BR \-c ", " \-\-show\-commands " [\fIn\fR]"
+Show the last
+.I n
+user\-initiated
+.B pacman -S
+(or
+.BR \-\-sync )
+commands recorded in the log.
+.TP
+.BR \-u ", " \-\-upgraded " [\fIn\fR]"
+Show the last
+.I n
+package upgrade events, one line per package reflecting its most recent
+upgrade within the window.
+.TP
+.BR \-s ", " \-\-show\-hist " [\fIn\fR]"
+Show the last
+.I n
+pacman transactions, with installed/removed/upgraded/downgraded/
+reinstalled packages grouped under the transaction they occurred in,
+alongside the triggering command and timestamp when available.
+.TP
+.BR \-h ", " \-\-help
+Display a usage summary and exit.
+.TP
+.BR \-v ", " \-\-version
+Output version information and exit.
+.\"
+.SH EXIT STATUS
+.B vlp
+exits with status 0 on success. It exits with a non\-zero status and
+prints a usage message to standard error if no mode flag, or more than
+one, is given, or if the arguments are otherwise invalid.
+.\"
+.SH FILES
+.TP
+.I /var/log/pacman.log
+The current pacman log.
+.TP
+.I /var/log/pacman.log.1
+.TQ
+.I /var/log/pacman.log.1.gz
+Rotated pacman log, read before the current log if present.
+.\"
+.SH EXAMPLES
+Show packages currently installed, based on the last 5000 matching lines:
+.RS
+.B vlp \-\-installed
+.RE
+.PP
+Show the last 20 explicit sync commands:
+.RS
+.B vlp \-c 20
+.RE
+.PP
+Show the last 50 upgrade events:
+.RS
+.B vlp \-\-upgraded 50
+.RE
+.PP
+Show the last 10 transactions, packages grouped by transaction:
+.RS
+.B vlp \-s 10
+.RE
+.\"
+.SH AUTHOR
+Written by Giovanni.
+.\"
+.SH COPYRIGHT
+Copyright \(co 2026 Giovanni.
+License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>.
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
