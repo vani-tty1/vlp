@@ -2,9 +2,7 @@ _vlp() {
     local cur="${COMP_WORDS[COMP_CWORD]}"
     local opts="-i --installed -c --show-commands -u --upgraded -h --help -v --version"
 
-    if [[ ${cur} == -* ]] ; then
-        COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
-        return 0
-    fi
+    COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+    return 0
 }
 complete -F _vlp vlp
