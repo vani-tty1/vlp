@@ -27,7 +27,7 @@ build:
 reconfigure:
 	meson setup $(BUILDDIR) --reconfigure
 
-install: build
+install: release
 	meson install -C $(RELEASEDIR)
 
 uninstall:

@@ -15,6 +15,13 @@ log lines are considered (default: 20). For `-s`, `n` instead limits how
 many of the most recent transactions are shown (also default: 20).
 
 
+## Installation
+
+[![Packaging status](https://repology.org/badge/vertical-allrepos/vlp.svg)](https://repology.org/project/vlp/versions)
+
+vlp is available at the [AUR](https://aur.archlinux.org/packages/vlp), 
+or you can install using the `install` target in the [Makefile](Makefile)
+
 ## Building
  
 Requires `meson`, `ninja`, and `zlib`.
