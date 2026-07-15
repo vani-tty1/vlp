@@ -23,7 +23,6 @@
 #include "vlp.h"
 
 static const char *PKG_RE_PATTERN = "^(\\[[^]]*\\][ \t]*)+(installed|removed) ([^ ]+) .*$";
-static const char *CMD_RE_PATTERN = "(\\[[^]]*\\][ \t]*)+Running '(pacman[ \t]+(-S[^ '\t]*|--sync[^ '\t]*)[^']*)'";
 static const char *UPGRADE_RE_PATTERN = "^(\\[[^]]*\\][ \t]*)+upgraded ([^ ]+) \\(([^)]+)\\).*$";
 
 // Any 'Running pacman ...' command, not just sync ones (needed for
@@ -34,7 +33,7 @@ static const char *TX_START_RE_PATTERN = "^\\[([^]]*)\\][ \t]*\\[ALPM\\] transac
 // installed/removed/upgraded/downgraded/reinstalled, with version detail.
 static const char *HIST_PKG_RE_PATTERN = "^(\\[[^]]*\\][ \t]*)+(installed|removed|upgraded|downgraded|reinstalled) ([^ ]+) \\(([^)]*)\\).*$";
 
-static regex_t pkg_re, cmd_re, upgrade_re;
+static regex_t pkg_re, upgrade_re;
 static regex_t cmd_any_re, tx_start_re, hist_pkg_re;
 
 static void strlist_init(StrList *sl) {
@@ -189,14 +188,12 @@ static int line_is_install_or_remove(const char *line) {
     return strstr(line, "] installed") != NULL || strstr(line, "] removed") != NULL;
 }
 
-static int line_is_sync_command(const char *line) {
-    if (strstr(line, "[PACMAN] Running '") == NULL)
-        return 0;
-    return strstr(line, " -S") != NULL || strstr(line, "--sync") != NULL;
-}
-
 static int line_is_upgraded(const char *line) {
     return strstr(line, "] upgraded") != NULL;
+}
+
+static int line_is_any_command(const char *line) {
+    return strstr(line, "[PACMAN] Running 'pacman") != NULL;
 }
 
 static void filter_lines(StrList *in, line_pred pred, PtrList *out) {
@@ -230,7 +227,6 @@ static void compile_regex(regex_t *re, const char *pattern) {
 
 void compile_all_regexes(void) {
     compile_regex(&pkg_re, PKG_RE_PATTERN);
-    compile_regex(&cmd_re, CMD_RE_PATTERN);
     compile_regex(&upgrade_re, UPGRADE_RE_PATTERN);
     compile_regex(&cmd_any_re, CMD_ANY_RE_PATTERN);
     compile_regex(&tx_start_re, TX_START_RE_PATTERN);
@@ -239,7 +235,6 @@ void compile_all_regexes(void) {
 
 void free_all_regexes(void) {
     regfree(&pkg_re);
-    regfree(&cmd_re);
     regfree(&upgrade_re);
     regfree(&cmd_any_re);
     regfree(&tx_start_re);
@@ -373,12 +368,12 @@ void show_sync_commands(int n) {
     strlist_init(&all);
     iter_log_lines(&all);
 
-    filter_lines(&all, line_is_sync_command, &matched);
+    filter_lines(&all, line_is_any_command, &matched);
     ptrlist_last_n(&matched, n, &window, &window_count);
 
     for (i = 0; i < window_count; i++) {
         char *line = window[i];
-        if (regexec(&cmd_re, line, 4, m, 0) == 0) {
+        if (regexec(&cmd_any_re, line, 4, m, 0) == 0) {
             char *cmd = extract_group(line, m, 2);
             if (cmd) {
                 printf("%s\n", cmd);
@@ -507,10 +502,6 @@ static void txlist_free(TransactionList *tl) {
     tl->capacity = 0;
 }
 
-static int line_is_any_command(const char *line) {
-    return strstr(line, "[PACMAN] Running 'pacman") != NULL;
-}
-
 static int line_is_transaction_start(const char *line) {
     return strstr(line, "[ALPM] transaction started") != NULL;
 }
@@ -630,7 +621,7 @@ void print_help(void) {
     printf("   n                        for -i/-c/-u: number of matching log lines to consider (default: %d)\n", DEFAULT_N);
     printf("                            for -s: number of most recent transactions to show (default: %d)\n", DEFAULT_N);
     printf("  -i, --installed           show packages currently installed according to the log\n");
-    printf("  -c, --show-commands       show the last n user-initiated 'pacman -S ...' commands\n");
+    printf("  -c, --show-commands       show the last n user-initiated pacman commands\n");
     printf("  -u, --upgraded            show the last n package upgrades\n");
     printf("  -s, --show-hist           show the last n transactions, packages grouped by transaction\n");
     printf("  -h, --help                display this help and exit\n");
